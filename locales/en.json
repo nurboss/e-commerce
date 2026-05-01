@@ -1,0 +1,9 @@
+{
+  "common": {
+    "storeName": "NUR Store",
+    "searchPlaceholder": "Search products",
+    "cart": "Cart",
+    "wishlist": "Wishlist",
+    "account": "Account"
+  }
+}
