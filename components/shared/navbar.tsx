@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useTheme } from "next-themes";
 import { useCart } from "@/hooks/use-cart";
 import { useDebounce } from "@/hooks/use-debounce";
+import { useCompare } from "@/hooks/use-compare";
 import { useWishlist } from "@/hooks/use-wishlist";
 import { formatPrice } from "@/lib/utils";
 import { useEffect, useState } from "react";
@@ -22,6 +23,7 @@ export const Navbar = () => {
   // const { setTheme, resolvedTheme } = useTheme();
   const { items } = useCart();
   const { productIds } = useWishlist();
+  const { productIds: compareIds } = useCompare();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const debouncedQuery = useDebounce(query, 300);
@@ -119,6 +121,7 @@ export const Navbar = () => {
         <nav className="flex items-center gap-4 text-sm">
           <Link href="/products">Products</Link>
           <Link href="/wishlist">Wishlist ({productIds.length})</Link>
+          <Link href="/compare">Compare ({compareIds.length})</Link>
           <Link href="/cart">Cart ({cartCount})</Link>
           <Link href="/account">Account</Link>
           <Link href="/login">Login</Link>
@@ -138,6 +141,13 @@ export const Navbar = () => {
           </button>
         </nav>
       </div>
+      {compareIds.length >= 2 ? (
+        <div className="border-t border-zinc-200 px-4 py-2 text-center text-xs dark:border-zinc-800">
+          <Link href="/compare" className="font-medium underline">
+            {compareIds.length} products selected for comparison
+          </Link>
+        </div>
+      ) : null}
     </header>
   );
 };

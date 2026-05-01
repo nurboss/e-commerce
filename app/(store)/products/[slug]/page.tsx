@@ -1,12 +1,43 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Breadcrumb } from "@/components/shared/breadcrumb";
 import { ProductDetailClient } from "@/components/shared/product-detail-client";
 import { getProductBySlug } from "@/lib/catalog";
+import { env } from "@/lib/env";
 import { formatPrice } from "@/lib/utils";
 
 type ProductDetailPageProps = {
   params: { slug: string };
 };
+
+export async function generateMetadata({ params }: ProductDetailPageProps): Promise<Metadata> {
+  const product = await getProductBySlug(params.slug);
+  if (!product || product.isArchived) {
+    return {
+      title: "Product not found | NUR Store",
+    };
+  }
+  const title = `${product.name} | NUR Store`;
+  const description = product.description.slice(0, 160);
+  const image = product.images[0] ?? "https://placehold.co/1200x630/png";
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: [image],
+      type: "website",
+      url: `${env.NEXT_PUBLIC_APP_URL}/products/${product.slug}`,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [image],
+    },
+  };
+}
 
 export default async function ProductDetailPage({ params }: ProductDetailPageProps) {
   const product = await getProductBySlug(params.slug);
@@ -19,6 +50,41 @@ export default async function ProductDetailPage({ params }: ProductDetailPagePro
 
   return (
     <section className="mx-auto max-w-7xl space-y-8 px-4 py-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Product",
+            name: product.name,
+            image: product.images,
+            description: product.description,
+            sku: product.id,
+            brand: {
+              "@type": "Brand",
+              name: product.brand.name,
+            },
+            aggregateRating:
+              product.reviews.length > 0
+                ? {
+                    "@type": "AggregateRating",
+                    ratingValue: averageRating.toFixed(1),
+                    reviewCount: product.reviews.length,
+                  }
+                : undefined,
+            offers: {
+              "@type": "Offer",
+              priceCurrency: "BDT",
+              price: Number(product.price),
+              availability:
+                product.variants.some((variant) => variant.stock > 0)
+                  ? "https://schema.org/InStock"
+                  : "https://schema.org/OutOfStock",
+              url: `${env.NEXT_PUBLIC_APP_URL}/products/${product.slug}`,
+            },
+          }),
+        }}
+      />
       <Breadcrumb
         items={[
           { href: "/products", label: "Products" },

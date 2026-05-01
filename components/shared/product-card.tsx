@@ -5,6 +5,7 @@ import Link from "next/link";
 import { StarRating } from "@/components/shared/star-rating";
 import { formatPrice } from "@/lib/utils";
 import { useCart } from "@/hooks/use-cart";
+import { useCompare } from "@/hooks/use-compare";
 import { useWishlist } from "@/hooks/use-wishlist";
 
 type ProductCardProps = {
@@ -28,7 +29,9 @@ export const ProductCard = ({
 }: ProductCardProps) => {
   const { addItem } = useCart();
   const { productIds, toggleItem } = useWishlist();
+  const { productIds: compareProductIds, toggleProduct } = useCompare();
   const isWishlisted = productIds.includes(id);
+  const isComparing = compareProductIds.includes(id);
 
   return (
     <article className="space-y-3 rounded-xl border border-zinc-200 p-3 dark:border-zinc-800">
@@ -55,13 +58,20 @@ export const ProductCard = ({
         <StarRating rating={rating} />
       </div>
 
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-3 gap-2">
         <button
           type="button"
           className="rounded-md border border-zinc-300 px-3 py-2 text-xs dark:border-zinc-700"
           onClick={() => toggleItem(id)}
         >
           {isWishlisted ? "Wishlisted" : "Wishlist"}
+        </button>
+        <button
+          type="button"
+          className="rounded-md border border-zinc-300 px-3 py-2 text-xs dark:border-zinc-700"
+          onClick={() => toggleProduct(id)}
+        >
+          {isComparing ? "Compared" : "Compare"}
         </button>
         <button
           type="button"
